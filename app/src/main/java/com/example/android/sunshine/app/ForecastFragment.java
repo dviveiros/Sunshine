@@ -12,8 +12,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -81,6 +84,16 @@ public class ForecastFragment extends Fragment {
 
         FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
         fetchWeatherTask.execute("94043");
+
+        forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                TextView textView = (TextView) view;
+                Log.v("Teste", "View = " + textView.getText());
+                Toast toast = Toast.makeText(view.getContext(), textView.getText(), Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        });
 
         return rootView;
     }
