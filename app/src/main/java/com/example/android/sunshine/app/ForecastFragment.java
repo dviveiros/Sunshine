@@ -64,18 +64,17 @@ public class ForecastFragment extends Fragment {
         int id = item.getItemId();
 
         if ( id == R.id.action_refresh ) {
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(
-                    this.getActivity().getBaseContext());
-            String postalCode = prefs.getString(
-                    getResources().getString(R.string.pref_location_key),
-                    getResources().getString(R.string.pref_location_default));
-
-            FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
-            fetchWeatherTask.execute(postalCode);
+            updateWeather();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
     }
 
     @Override
@@ -90,15 +89,7 @@ public class ForecastFragment extends Fragment {
         ListView forecastListView = (ListView) rootView.findViewById(R.id.listview_forecast);
         forecastListView.setAdapter(adapter);
 
-        //gets the postal code
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(rootView.getContext());
-        String postalCode = prefs.getString(
-                getResources().getString(R.string.pref_location_key),
-                getResources().getString(R.string.pref_location_default));
-
-        prefs.getBoolean("keystring", true);
-        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
-        fetchWeatherTask.execute(postalCode);
+        updateWeather();
 
         forecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -115,6 +106,27 @@ public class ForecastFragment extends Fragment {
         });
 
         return rootView;
+    }
+
+    /**
+     * Updates weather
+     */
+    private void updateWeather() {
+        //gets the postal code
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(
+                this.getActivity().getBaseContext());
+
+        String postalCode = prefs.getString(
+                getResources().getString(R.string.pref_location_key),
+                getResources().getString(R.string.pref_location_default));
+
+        String metricUnit = prefs.getString(
+                getResources().getString(R.string.pref_temp_unit_key),
+                getResources().getString(R.string.pref_temp_unit_default));
+
+
+        FetchWeatherTask fetchWeatherTask = new FetchWeatherTask();
+        fetchWeatherTask.execute(postalCode, metricUnit);
     }
 
     /**
@@ -162,7 +174,7 @@ public class ForecastFragment extends Fragment {
 
                 String postalCode = params[0];
                 String mode = "json";
-                String units = "metrics";
+                String units = params[1];
                 Integer qty = 7;
 
                 Uri.Builder builder = new Uri.Builder();
