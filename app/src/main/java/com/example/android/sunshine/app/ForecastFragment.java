@@ -2,6 +2,7 @@ package com.example.android.sunshine.app;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -66,6 +67,8 @@ public class ForecastFragment extends Fragment {
         if ( id == R.id.action_refresh ) {
             updateWeather();
             return true;
+        } else if ( id == R.id.action_view_location ) {
+            showMap();
         }
 
         return super.onOptionsItemSelected(item);
@@ -130,6 +133,40 @@ public class ForecastFragment extends Fragment {
     }
 
     /**
+     * Show the map
+     */
+    private void showMap() {
+
+        //gets the postal code
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(
+                this.getActivity().getBaseContext());
+
+        String postalCode = prefs.getString(
+                getResources().getString(R.string.pref_location_key),
+                getResources().getString(R.string.pref_location_default));
+
+        Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                Uri.parse("http://maps.google.com/maps?q=" + postalCode));
+        if (isAppInstalled("com.google.android.apps.maps")) {
+            intent.setClassName("com.google.android.apps.maps", "com.google.android.maps.MapsActivity");
+        }
+        startActivity(intent);
+    }
+
+    // helper function to check if Maps is installed
+    private boolean isAppInstalled(String uri) {
+        PackageManager pm = getActivity().getApplicationContext().getPackageManager();
+        boolean app_installed = false;
+        try {
+            pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES);
+            app_installed = true;
+        } catch (PackageManager.NameNotFoundException e) {
+            app_installed = false;
+        }
+        return app_installed;
+    }
+
+    /**
      * Inner class to fetch weather information
      */
     private class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
@@ -152,7 +189,7 @@ public class ForecastFragment extends Fragment {
         @Override
         protected String[] doInBackground(String... params) {
 
-            String[] result = null;
+            String[] result = new String[0];
 
             if (params.length == 0) {
                 //nothing to do
