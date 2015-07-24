@@ -17,12 +17,28 @@ package com.example.android.sunshine.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.preference.PreferenceManager;
 
 import java.text.DateFormat;
 import java.util.Date;
 
 public class Utility {
+
+    /*
+        This is ported from FetchWeatherTask --- but now we go straight from the cursor to the
+        string.
+     */
+    public static String convertCursorRowToUXFormat(Context context, Cursor cursor) {
+        String highAndLow = Utility.formatHighLows(context,
+                cursor.getDouble(ForecastFragment.COL_WEATHER_MAX_TEMP),
+                cursor.getDouble(ForecastFragment.COL_WEATHER_MIN_TEMP));
+
+        return Utility.formatDate(cursor.getLong(ForecastFragment.COL_WEATHER_DATE)) +
+                " - " + cursor.getString(ForecastFragment.COL_WEATHER_DESC) +
+                " - " + highAndLow;
+    }
+
     public static String getPreferredLocation(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getString(context.getString(R.string.pref_location_key),
@@ -49,5 +65,14 @@ public class Utility {
     static String formatDate(long dateInMillis) {
         Date date = new Date(dateInMillis);
         return DateFormat.getDateInstance().format(date);
+    }
+
+    /**
+     * Prepare the weather high/lows for presentation.
+     */
+    static String formatHighLows(Context context, double high, double low) {
+        boolean isMetric = Utility.isMetric(context);
+        String highLowStr = Utility.formatTemperature(high, isMetric) + "/" + Utility.formatTemperature(low, isMetric);
+        return highLowStr;
     }
 }
