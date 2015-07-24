@@ -272,6 +272,10 @@ public class WeatherProvider extends ContentProvider {
         Uri returnUri;
         int rowsAffected = 0;
 
+        if (selection == null) {
+            selection = "1";
+        }
+
         switch (match) {
             case WEATHER: {
                 rowsAffected = db.delete(WeatherContract.WeatherEntry.TABLE_NAME,
@@ -321,6 +325,7 @@ public class WeatherProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         Uri returnUri;
         int rowsAffected = 0;
+
 
         switch (match) {
             case WEATHER: {
